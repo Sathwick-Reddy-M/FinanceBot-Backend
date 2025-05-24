@@ -1,4 +1,4 @@
-#!/home/user/finview/.venv/bin/python3.11
+#!/Users/sathwick/SDrive/projects/FinanceBot-Backend/.venv/bin/python
 # -*- coding: utf-8 -*-
 import re
 import sys
