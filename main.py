@@ -2,6 +2,7 @@ import os
 import threading
 
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 from chatbot import graph_with_tools
 from data_models import *
 import user_data
@@ -11,6 +12,15 @@ from langchain_core.messages.ai import AIMessage
 
 def create_app() -> Flask:
     app = Flask(__name__)
+
+    CORS(
+        app,
+        resources={
+            r"/chat": {
+                "origins": "https://9000-firebase-studio-1748025806552.cluster-f4iwdviaqvc2ct6pgytzw4xqy4.cloudworkstations.dev/"
+            },
+        },
+    )
 
     # CONFIGURATION
     env = os.environ.get("FLASK_ENV", "production").lower()
