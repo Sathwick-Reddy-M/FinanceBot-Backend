@@ -1,6 +1,6 @@
 from utils import *
 from data_models import *
-from user_data import *
+import user_data
 
 from langchain_core.tools import tool
 
@@ -369,7 +369,10 @@ def get_all_investment_account_ids_and_names() -> list[dict[str, str]]:
         - "I want to check the balance of one of my investment accounts, what are they called?"
         - User asks a question about an investment account without specifying which one, and the agent needs to clarify.
     """
-    return [{"id": account.id, "name": account.name} for account in INVESTMENT_ACCOUNTS]
+    return [
+        {"id": account.id, "name": account.name}
+        for account in user_data.INVESTMENT_ACCOUNTS
+    ]
 
 
 # Traditional IRAs
@@ -529,7 +532,7 @@ def get_all_traditional_ira_account_ids_and_names() -> list[dict[str, str]]:
         - "What are the names of my Traditional IRAs?"
         - User asks about a Traditional IRA without specifying which one.
     """
-    return [{"id": ira.id, "name": ira.name} for ira in TRADITIONAL_IRAS]
+    return [{"id": ira.id, "name": ira.name} for ira in user_data.TRADITIONAL_IRAS]
 
 
 # Roth IRAs
@@ -687,7 +690,9 @@ def get_all_roth_ira_account_ids_and_names() -> list[dict[str, str]]:
         - "What Roth IRAs do I have?"
         - User asks about a Roth IRA without specifying which one.
     """
-    return [{"id": roth_ira.id, "name": roth_ira.name} for roth_ira in ROTH_IRAS]
+    return [
+        {"id": roth_ira.id, "name": roth_ira.name} for roth_ira in user_data.ROTH_IRAS
+    ]
 
 
 # Retirement 401(k)s
@@ -852,7 +857,10 @@ def get_all_401k_account_ids_and_names() -> list[dict[str, str]]:
         - "What are the names of my Traditional 401(k)s?"
         - User asks about a 401(k) without specifying which one.
     """
-    return [{"id": ret_401k.id, "name": ret_401k.name} for ret_401k in RETIREMENT_401KS]
+    return [
+        {"id": ret_401k.id, "name": ret_401k.name}
+        for ret_401k in user_data.RETIREMENT_401KS
+    ]
 
 
 # Roth 401(k)s
@@ -1015,7 +1023,10 @@ def get_all_roth_401k_account_ids_and_names() -> list[dict[str, str]]:
         - "Do I have a Roth 401(k)?"
         - User asks about a Roth 401(k) without specifying which one.
     """
-    return [{"id": roth_401k.id, "name": roth_401k.name} for roth_401k in ROTH_401KS]
+    return [
+        {"id": roth_401k.id, "name": roth_401k.name}
+        for roth_401k in user_data.ROTH_401KS
+    ]
 
 
 # Credit Cards
@@ -1074,7 +1085,7 @@ def get_all_credit_cards():
         - "What credit cards do I have with you?"
         - User asks about a specific card's balance or limit without specifying which card.
     """
-    return [{"id": card.id, "name": card.name} for card in CREDIT_CARDS]
+    return [{"id": card.id, "name": card.name} for card in user_data.CREDIT_CARDS]
 
 
 @tool
@@ -1167,7 +1178,7 @@ def optimize_spending_in_a_category(
             annual_fee=cc.annual_fee,
             rewards_summary=cc.rewards_summary,
         )
-        for cc in CREDIT_CARDS
+        for cc in user_data.CREDIT_CARDS
     ]
 
     prompt = f"""
@@ -1253,7 +1264,7 @@ def optimize_spending_with_cc_all_categories(
             annual_fee=cc.annual_fee,
             rewards_summary=cc.rewards_summary,
         )
-        for cc in CREDIT_CARDS
+        for cc in user_data.CREDIT_CARDS
     ]
 
     current_cc_details_str = "\n".join(f"- {str(cc)} " for cc in current_cc)
@@ -1404,7 +1415,10 @@ def get_all_checking_accounts() -> list[dict[str, str]]:
         - "What are the names of my checking accounts?"
         - User asks about a transaction or balance without specifying which checking account.
     """
-    return [{"id": account.id, "name": account.name} for account in CHECKING_ACCOUNTS]
+    return [
+        {"id": account.id, "name": account.name}
+        for account in user_data.CHECKING_ACCOUNTS
+    ]
 
 
 @tool
@@ -1506,7 +1520,10 @@ def get_all_saving_accounts() -> list[dict[str, str]]:
         - "What are the names of my savings accounts?"
         - User asks about interest rate or balance without specifying which savings account.
     """
-    return [{"id": account.id, "name": account.name} for account in SAVING_ACCOUNTS]
+    return [
+        {"id": account.id, "name": account.name}
+        for account in user_data.SAVING_ACCOUNTS
+    ]
 
 
 @tool
@@ -1614,7 +1631,7 @@ def get_all_loans() -> list[dict[str, str]]:
         - User asks about interest rate or balance without specifying which loan.
     """
 
-    return [{"id": loan.id, "name": loan.name} for loan in LOANS]
+    return [{"id": loan.id, "name": loan.name} for loan in user_data.LOANS]
 
 
 @tool
@@ -1728,7 +1745,7 @@ def get_all_payrolls() -> list[dict[str, str]]:
         - "Which payroll records do you have for me?"
         - User asks about deductions or income without specifying which job/payroll.
     """
-    return [{"id": payroll.id, "name": payroll.name} for payroll in PAYROLLS]
+    return [{"id": payroll.id, "name": payroll.name} for payroll in user_data.PAYROLLS]
 
 
 @tool
@@ -1826,7 +1843,9 @@ def get_all_hsa_accounts() -> list[dict[str, str]]:
         - "What HSAs do I have?"
         - User asks about contributions or investments without specifying which HSA.
     """
-    return [{"id": account.id, "name": account.name} for account in HSA_ACCOUNTS]
+    return [
+        {"id": account.id, "name": account.name} for account in user_data.HSA_ACCOUNTS
+    ]
 
 
 @tool
@@ -1932,7 +1951,9 @@ def get_all_other_accounts() -> list[dict[str, str]]:
         - "List my 'other' accounts."
         - "What accounts are in the 'other' category?"
     """
-    return [{"id": account.id, "name": account.name} for account in OTHER_ACCOUNTS]
+    return [
+        {"id": account.id, "name": account.name} for account in user_data.OTHER_ACCOUNTS
+    ]
 
 
 @tool

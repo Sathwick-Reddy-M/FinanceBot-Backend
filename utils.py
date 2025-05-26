@@ -1,17 +1,60 @@
 from data_models import *
-from user_data import *
+import user_data
 
 from google import genai
 from google.genai import types
 from google.genai.types import Tool, GenerateContentConfig, GoogleSearch
 from langchain_core.tools import tool
+from langchain_core.messages import HumanMessage, AIMessage, BaseMessage
 
 from collections import defaultdict
 import datetime
+import os
+
+
+def parse_messages_for_langgraph(messages_input):
+    """
+    Parses a list of raw message dictionaries into a list of LangGraph-compatible
+    BaseMessage objects (HumanMessage, AIMessage).
+
+    Args:
+        messages_input: A list of dictionaries, where each dictionary represents a message
+                        and is expected to have "sender" and "text" keys.
+
+    Returns:
+        A list of BaseMessage objects (HumanMessage or AIMessage).
+    """
+    processed_messages = []
+    for msg_data in messages_input:
+        sender = msg_data.get("sender")
+        text = msg_data.get("text")
+
+        if sender is None or text is None:
+            print(
+                f"Warning: Skipping message due to missing sender or text: {msg_data}"
+            )
+            continue
+
+        if sender == "user":
+            processed_messages.append(HumanMessage(content=text))
+        elif sender == "bot":
+            # LangGraph typically uses AIMessage for bot/assistant responses
+            processed_messages.append(AIMessage(content=text))
+        else:
+            print(f"Warning: Unknown sender type '{sender}' in message: {msg_data}")
+            # Optionally, you could raise an error or handle other sender types
+            # For now, we'll just skip unknown senders.
+            # To include them as generic messages, you might use:
+            # from langchain_core.messages import ChatMessage
+            # processed_messages.append(ChatMessage(role=sender, content=text))
+
+    return processed_messages
 
 
 def get_structured_output_with_grounding(model, prompt, response_schema):
-    client = genai.Client(api_key=GOOGLE_API_KEY)
+    client = genai.Client(api_key=os.getenv("GOOGLE_API_KEY"))
+
+    google_search_tool = Tool(google_search=GoogleSearch())
 
     grounding_response = client.models.generate_content(
         model=model,
@@ -175,9 +218,9 @@ def get_summary_of_investment_accounts() -> SummaryOfInvestmentAccounts:
     """
     result = {
         "total_uninvested_amount": sum(
-            account.uninvested_amount for account in INVESTMENT_ACCOUNTS
+            account.uninvested_amount for account in user_data.INVESTMENT_ACCOUNTS
         ),
-        "invested_securities_info": summary_of_assets(INVESTMENT_ACCOUNTS),
+        "invested_securities_info": summary_of_assets(user_data.INVESTMENT_ACCOUNTS),
     }
 
     return SummaryOfInvestmentAccounts(**result)
@@ -197,7 +240,7 @@ def get_summary_of_credit_cards() -> SummaryOfCreditCards:
     weighted_apr = 0
     total_annual_fees = 0
 
-    for card in CREDIT_CARDS:
+    for card in user_data.CREDIT_CARDS:
         total_limit += float(card.total_limit)
         available_credit += float(card.current_limit)
         outstanding_debt += float(card.outstanding_debt)
@@ -245,7 +288,7 @@ def get_summary_of_checking_or_savings_accounts(
     """
     Provides a summary of all checking or savings accounts.
     """
-    accounts = CHECKING_ACCOUNTS if is_checking else SAVING_ACCOUNTS
+    accounts = user_data.CHECKING_ACCOUNTS if is_checking else user_data.SAVING_ACCOUNTS
 
     total_balance = 0.0
     net_flow = 0.0
@@ -322,12 +365,13 @@ def get_summary_of_traditional_ira_accounts() -> SummaryOfIRAAccounts:
     """
     result = {
         "total_uninvested_amount": sum(
-            account.uninvested_amount for account in TRADITIONAL_IRAS
+            account.uninvested_amount for account in user_data.TRADITIONAL_IRAS
         ),
         "total_average_monthly_contribution": sum(
-            account.average_monthly_contribution for account in TRADITIONAL_IRAS
+            account.average_monthly_contribution
+            for account in user_data.TRADITIONAL_IRAS
         ),
-        "invested_securities_info": summary_of_assets(TRADITIONAL_IRAS),
+        "invested_securities_info": summary_of_assets(user_data.TRADITIONAL_IRAS),
     }
 
     return SummaryOfIRAAccounts(**result)
@@ -342,12 +386,12 @@ def get_summary_of_roth_ira_accounts() -> SummaryOfIRAAccounts:
     """
     result = {
         "total_uninvested_amount": sum(
-            account.uninvested_amount for account in ROTH_IRAS
+            account.uninvested_amount for account in user_data.ROTH_IRAS
         ),
         "total_average_monthly_contribution": sum(
-            account.average_monthly_contribution for account in ROTH_IRAS
+            account.average_monthly_contribution for account in user_data.ROTH_IRAS
         ),
-        "invested_securities_info": summary_of_assets(ROTH_IRAS),
+        "invested_securities_info": summary_of_assets(user_data.ROTH_IRAS),
     }
 
     return SummaryOfIRAAccounts(**result)
@@ -359,15 +403,16 @@ def get_summary_of_401k_accounts() -> SummaryOf401kAccounts:
     """
     result = {
         "total_uninvested_amount": sum(
-            account.uninvested_amount for account in RETIREMENT_401KS
+            account.uninvested_amount for account in user_data.RETIREMENT_401KS
         ),
         "total_average_monthly_contribution": sum(
-            account.average_monthly_contribution for account in RETIREMENT_401KS
+            account.average_monthly_contribution
+            for account in user_data.RETIREMENT_401KS
         ),
         "employer_matches_summary": ", \n".join(
-            account.employer_match for account in RETIREMENT_401KS
+            account.employer_match for account in user_data.RETIREMENT_401KS
         ),
-        "invested_securities_info": summary_of_assets(RETIREMENT_401KS),
+        "invested_securities_info": summary_of_assets(user_data.RETIREMENT_401KS),
     }
 
     return SummaryOf401kAccounts(**result)
@@ -379,15 +424,15 @@ def get_summary_of_roth_401k_accounts() -> SummaryOf401kAccounts:
     """
     result = {
         "total_uninvested_amount": sum(
-            account.uninvested_amount for account in ROTH_401KS
+            account.uninvested_amount for account in user_data.ROTH_401KS
         ),
         "total_average_monthly_contribution": sum(
-            account.average_monthly_contribution for account in ROTH_401KS
+            account.average_monthly_contribution for account in user_data.ROTH_401KS
         ),
         "employer_matches_summary": ", \n".join(
-            account.employer_match for account in ROTH_401KS
+            account.employer_match for account in user_data.ROTH_401KS
         ),
-        "invested_securities_info": summary_of_assets(ROTH_401KS),
+        "invested_securities_info": summary_of_assets(user_data.ROTH_401KS),
     }
 
     return SummaryOf401kAccounts(**result)
@@ -397,7 +442,7 @@ def get_summary_of_loan_accounts() -> SummaryOfLoanAccounts:
     """
     Provides a summary of all of the loan accounts.
     """
-    total_loans = len(LOANS)
+    total_loans = len(user_data.LOANS)
     total_outstanding = 0.0
     total_paid = 0.0
     total_principal = 0.0
@@ -411,7 +456,7 @@ def get_summary_of_loan_accounts() -> SummaryOfLoanAccounts:
     loans_with_prepay_penalty = 0
     active_loans = 0
 
-    for loan in LOANS:
+    for loan in user_data.LOANS:
         # Basic financials
         outstanding = loan.outstanding_balance
         paid = loan.total_paid
@@ -506,7 +551,7 @@ def get_summary_of_payroll_accounts() -> SummaryOfPayrollAccounts:
     frequencies = defaultdict(int)
     all_benefits = ""
 
-    for record in PAYROLLS:
+    for record in user_data.PAYROLLS:
         total_gross += record.annual_income
         total_net += record.net_income
         total_bonus += record.bonus_income
@@ -529,7 +574,7 @@ def get_summary_of_payroll_accounts() -> SummaryOfPayrollAccounts:
             ytd_max = ytd
 
     result = {
-        "total_entries": len(PAYROLLS),
+        "total_entries": len(user_data.PAYROLLS),
         "total_annual_income": round(total_gross, 2),
         "total_net_income": round(total_net, 2),
         "total_bonus_income": round(total_bonus, 2),
@@ -555,8 +600,8 @@ def get_summary_of_other_accounts() -> SummaryOfOtherAccounts:
 
     """
     return SummaryOfOtherAccounts(
-        total_income=sum(account.total_income for account in OTHER_ACCOUNTS),
-        total_debt=sum(account.total_debt for account in OTHER_ACCOUNTS),
+        total_income=sum(account.total_income for account in user_data.OTHER_ACCOUNTS),
+        total_debt=sum(account.total_debt for account in user_data.OTHER_ACCOUNTS),
     )
 
 
@@ -566,12 +611,12 @@ def get_summary_of_hsa_accounts() -> SummaryOfHSAAccounts:
     """
     result = {
         "total_uninvested_amount": sum(
-            account.uninvested_amount for account in HSA_ACCOUNTS
+            account.uninvested_amount for account in user_data.HSA_ACCOUNTS
         ),
         "total_average_monthly_contribution": sum(
-            account.average_monthly_contribution for account in HSA_ACCOUNTS
+            account.average_monthly_contribution for account in user_data.HSA_ACCOUNTS
         ),
-        "invested_securities_info": summary_of_assets(HSA_ACCOUNTS),
+        "invested_securities_info": summary_of_assets(user_data.HSA_ACCOUNTS),
     }
 
     return SummaryOfHSAAccounts(**result)
@@ -583,51 +628,63 @@ def get_user_financial_summary():
     """
 
     return {
-        "user_details": str(anonymize_user_personal_details(USER_DETAILS)),
+        "user_details": str(anonymize_user_personal_details(user_data.USER_DETAILS)),
         "investment_summary": (
             str(get_summary_of_investment_accounts())
-            if INVESTMENT_ACCOUNTS
+            if user_data.INVESTMENT_ACCOUNTS
             else "NO INVESTMENT ACCOUNTS"
         ),
         "credit_card_summary": (
-            str(get_summary_of_credit_cards()) if CREDIT_CARDS else "NO CREDIT CARDS"
+            str(get_summary_of_credit_cards())
+            if user_data.CREDIT_CARDS
+            else "NO CREDIT CARDS"
         ),
         "checking_summary": (
             str(get_summary_of_checking_or_savings_accounts(is_checking=True))
-            if CHECKING_ACCOUNTS
+            if user_data.CHECKING_ACCOUNTS
             else "NO CHECKING ACCOUNTS"
         ),
         "saving_summary": (
             str(get_summary_of_checking_or_savings_accounts(is_checking=False))
-            if SAVING_ACCOUNTS
+            if user_data.SAVING_ACCOUNTS
             else "NO SAVING ACCOUNTS"
         ),
-        "loans_summary": str(get_summary_of_loan_accounts()) if LOANS else "NO LOANS",
+        "loans_summary": (
+            str(get_summary_of_loan_accounts()) if user_data.LOANS else "NO LOANS"
+        ),
         "payrolls_summary": (
-            str(get_summary_of_payroll_accounts()) if PAYROLLS else "NO PAYROLLS"
+            str(get_summary_of_payroll_accounts())
+            if user_data.PAYROLLS
+            else "NO PAYROLLS"
         ),
         "traditional_ira_summary": (
             str(get_summary_of_traditional_ira_accounts())
-            if TRADITIONAL_IRAS
+            if user_data.TRADITIONAL_IRAS
             else "NO TRADITIONAL IRAS"
         ),
         "roth_ira_summary": (
-            str(get_summary_of_roth_ira_accounts()) if ROTH_IRAS else "NO ROTH IRAS"
+            str(get_summary_of_roth_ira_accounts())
+            if user_data.ROTH_IRAS
+            else "NO ROTH IRAS"
         ),
         "retirement_401k_summary": (
             str(get_summary_of_401k_accounts())
-            if RETIREMENT_401KS
+            if user_data.RETIREMENT_401KS
             else "NO RETIREMENT 401K"
         ),
         "roth_401k_summary": (
-            str(get_summary_of_roth_401k_accounts()) if ROTH_401KS else "NO ROTH 401K"
+            str(get_summary_of_roth_401k_accounts())
+            if user_data.ROTH_401KS
+            else "NO ROTH 401K"
         ),
         "hsa_summary": (
-            str(get_summary_of_hsa_accounts()) if HSA_ACCOUNTS else "NO HSA ACCOUNTS"
+            str(get_summary_of_hsa_accounts())
+            if user_data.HSA_ACCOUNTS
+            else "NO HSA ACCOUNTS"
         ),
         "other_accounts_summary": (
             str(get_summary_of_other_accounts())
-            if OTHER_ACCOUNTS
+            if user_data.OTHER_ACCOUNTS
             else "NO OTHER ACCOUNTS"
         ),
     }
