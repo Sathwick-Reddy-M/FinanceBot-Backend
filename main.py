@@ -17,9 +17,12 @@ def create_app() -> Flask:
         app,
         resources={
             r"/chat": {
-                "origins": "https://9000-firebase-studio-1748025806552.cluster-f4iwdviaqvc2ct6pgytzw4xqy4.cloudworkstations.dev/"
+                "origins": "https://9000-firebase-studio-1748025806552.cluster-f4iwdviaqvc2ct6pgytzw4xqy4.cloudworkstations.dev/",
+                "methods": ["POST", "OPTIONS"],
+                "allow_headers": ["Content-Type"],
             },
         },
+        supports_credentials=True,
     )
 
     # CONFIGURATION
