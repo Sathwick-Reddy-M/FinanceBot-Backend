@@ -11,6 +11,10 @@ from typing_extensions import TypedDict
 from tools import *
 from utils import *
 from data_models import *
+from dotenv import load_dotenv
+
+load_dotenv()
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 
 
 # Define a retry policy. The model might make multiple consecutive calls automatically
@@ -161,7 +165,7 @@ auto_tools = [
 tool_node = ToolNode(auto_tools)
 
 
-llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash")
+llm = ChatGoogleGenerativeAI(model="gemini-2.0-flash", google_api_key=GOOGLE_API_KEY)
 
 # The LLM needs to know about all of the tools, so specify everything here.
 llm_with_tools = llm.bind_tools(auto_tools)
