@@ -2,11 +2,19 @@ name: Deploy Flask app as static site to GitHub Pages
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
+
+permissions:
+  contents: write
+  pages: write
 
 jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
+
+    env:
+      GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+
     steps:
       - name: Check out repo
         uses: actions/checkout@v3
