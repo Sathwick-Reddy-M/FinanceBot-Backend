@@ -1,0 +1,38 @@
+name: Deploy Flask app as static site to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt frozen-flask
+
+      - name: Freeze Flask app to static
+        run: |
+          python - <<EOF
+          from main import create_app
+          from flask_frozen import Freezer
+          app = create_app()
+          freezer = Freezer(app)
+          freezer.freeze()
+          EOF
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./build
