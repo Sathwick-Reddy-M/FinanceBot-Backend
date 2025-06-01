@@ -19,6 +19,7 @@ def create_app() -> Flask:
             r"/chat": {
                 "origins": [
                     "https://9000-firebase-studio-1748025806552.cluster-f4iwdviaqvc2ct6pgytzw4xqy4.cloudworkstations.dev",
+                    "https://sathwick-reddy-m.github.io/FinanceBot-Frontend",
                     "https://sathwick-reddy-m.github.io",
                 ],
                 "methods": ["POST", "OPTIONS"],
