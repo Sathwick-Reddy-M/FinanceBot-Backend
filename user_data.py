@@ -2,6 +2,8 @@ from data_models import *
 
 # Personal Details:
 
+USER_DETAILS = None
+
 INVESTMENT_ACCOUNTS = []
 CREDIT_CARDS = []
 CHECKING_ACCOUNTS = []

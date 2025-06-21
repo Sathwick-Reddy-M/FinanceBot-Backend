@@ -64,7 +64,7 @@ def get_user_details() -> UserDetails:
         - User asks: "Are there any state-specific tax benefits I should know about?"
         - Bot needs to understand the user's general context before providing tax or residency-related advice.
     """
-    return anonymize_user_personal_details(USER_DETAILS)
+    return anonymize_user_personal_details(user_data.UserDetails)
 
 
 # Manage Tickers
@@ -238,7 +238,7 @@ def extract_unique_tickers_investment_accounts(
     tickers = set()
 
     for id_ in investment_account_ids:
-        record = INVESTMENT_ACCOUNTS_DICT.get(id_)
+        record = user_data.INVESTMENT_ACCOUNTS_DICT.get(id_)
         assets = record.asset_distribution
 
         tickers = tickers | {asset.ticker.upper() for asset in assets}
@@ -331,7 +331,7 @@ def get_investment_account(
         - User selects a specific account from a list provided by `get_all_investment_account_ids_and_names`.
     """
 
-    account = INVESTMENT_ACCOUNTS_DICT.get(account_id, None)
+    account = user_data.INVESTMENT_ACCOUNTS_DICT.get(account_id, None)
 
     if not account:
         # Return a more specific exception or error message structure if preferred
@@ -403,7 +403,7 @@ def extract_unique_tickers_traditional_ira(
     tickers = set()
 
     for id_ in traditional_ira_account_ids:
-        record = TRADITIONAL_IRAS_DICT.get(id_)
+        record = user_data.TRADITIONAL_IRAS_DICT.get(id_)
         assets = record.asset_distribution
 
         tickers = tickers | {asset.ticker.upper() for asset in assets}
@@ -495,7 +495,7 @@ def get_traditional_ira_account(
         - User selects a specific Traditional IRA from a list.
     """
 
-    account = TRADITIONAL_IRAS_DICT.get(traditional_ira_account_id, None)
+    account = user_data.TRADITIONAL_IRAS_DICT.get(traditional_ira_account_id, None)
 
     if not account:
         return Exception(
@@ -563,7 +563,7 @@ def extract_unique_tickers_roth_ira(
     tickers = set()
 
     for id_ in roth_ira_account_ids:
-        record = ROTH_IRAS_DICT.get(id_)
+        record = user_data.ROTH_IRAS_DICT.get(id_)
         assets = record.asset_distribution
 
         tickers = tickers | {asset.ticker.upper() for asset in assets}
@@ -655,7 +655,7 @@ def get_roth_ira_account(
         - User selects a specific Roth IRA from a list.
     """
 
-    account = ROTH_IRAS_DICT.get(roth_ira_account_id, None)
+    account = user_data.ROTH_IRAS_DICT.get(roth_ira_account_id, None)
 
     if not account:
         return Exception(f"Roth IRA account with ID '{roth_ira_account_id}' not found.")
@@ -723,7 +723,7 @@ def extract_unique_tickers_401k(
     tickers = set()
 
     for id_ in retirment_401k_account_ids:
-        record = RETIREMENT_401KS_DICT.get(id_)
+        record = user_data.RETIREMENT_401KS_DICT.get(id_)
         assets = record.asset_distribution
 
         tickers = tickers | {asset.ticker.upper() for asset in assets}
@@ -819,7 +819,7 @@ def get_401k_account(
         - User selects a specific 401(k) from a list.
     """
 
-    account = RETIREMENT_401KS_DICT.get(retirement_401k_account_id, None)
+    account = user_data.RETIREMENT_401KS_DICT.get(retirement_401k_account_id, None)
 
     if not account:
         return Exception(
@@ -889,7 +889,7 @@ def extract_unique_tickers_roth_401k(
     tickers = set()
 
     for id_ in roth_401k_account_ids:
-        record = ROTH_401KS_DICT.get(id_)
+        record = user_data.ROTH_401KS_DICT.get(id_)
         assets = record.asset_distribution
 
         tickers = tickers | {asset.ticker.upper() for asset in assets}
@@ -985,7 +985,7 @@ def get_roth_401k_account(
         - User selects a specific Roth 401(k) from a list.
     """
 
-    account = ROTH_401KS_DICT.get(roth_401k_account_id, None)
+    account = user_data.ROTH_401KS_DICT.get(roth_401k_account_id, None)
 
     if not account:
         return Exception(
@@ -1120,7 +1120,7 @@ def get_credit_card(card_id: str) -> CreditCard | Exception:
         - User selects a specific card from the list provided by `get_all_credit_cards`.
     """
 
-    card = CREDIT_CARDS_DICT.get(card_id, None)
+    card = user_data.CREDIT_CARDS_DICT.get(card_id, None)
 
     if not card:
         return Exception(f"Credit Card with ID: {card_id} not found")
@@ -1455,7 +1455,7 @@ def get_checking_account(account_id: str) -> CheckingOrSavingsAccount | Exceptio
         - "What are the fees associated with checking account CHK1?"
         - User selects a specific checking account from the list.
     """
-    account = CHECKING_ACCOUNTS_DICT.get(account_id, None)
+    account = user_data.CHECKING_ACCOUNTS_DICT.get(account_id, None)
 
     if not account:
         return Exception(f"Checking Account with ID: {account_id} not found")
@@ -1555,7 +1555,7 @@ def get_saving_account(account_id: str) -> CheckingOrSavingsAccount | Exception:
         - "List recent interest payments to my emergency fund account."
         - User selects a specific savings account from the list.
     """
-    account = SAVING_ACCOUNTS_DICT.get(account_id, None)
+    account = user_data.SAVING_ACCOUNTS_DICT.get(account_id, None)
 
     if not account:
         return Exception(f"Savings Account with ID: {account_id} not found")
@@ -1676,7 +1676,7 @@ def get_loan(loan_id: str) -> Loan | Exception:
         - User selects a specific loan from the list.
     """
 
-    loan = LOANS_DICT.get(loan_id, None)
+    loan = user_data.LOANS_DICT.get(loan_id, None)
 
     if not loan:
         return Exception(f"Loan with ID: {loan_id} not found")
@@ -1784,7 +1784,7 @@ def get_payroll(payroll_id: str) -> Payroll | Exception:
         - "What is the pay frequency for my main job?"
         - User selects a specific payroll record from the list.
     """
-    payroll = PAYROLLS_DICT.get(payroll_id, None)
+    payroll = user_data.PAYROLLS_DICT.get(payroll_id, None)
 
     if not payroll:
         return Exception(f"Payroll with ID: {payroll_id} not found")
@@ -1889,7 +1889,7 @@ def get_hsa_account(account_id: str) -> SummaryOfHSAAccounts | Exception:
         - "How much cash do I have in HSA account HSA1?"
         - User selects a specific HSA from the list.
     """
-    account = HSA_ACCOUNTS_DICT.get(account_id, None)
+    account = user_data.HSA_ACCOUNTS_DICT.get(account_id, None)
 
     if not account:
         return Exception(f"HSA Account with ID: {account_id} not found")
@@ -1979,7 +1979,7 @@ def get_other_account(account_id: str) -> OtherAccount | Exception:
         - "What's the balance reported for my PayPal account?"
         - User selects a specific account from the 'other' list.
     """
-    account = OTHER_ACCOUNTS_DICT.get(account_id, None)
+    account = user_data.OTHER_ACCOUNTS_DICT.get(account_id, None)
 
     if not account:
         return Exception(f"Other Account with ID: {account_id} not found")
@@ -2018,7 +2018,7 @@ def optimize_financial_plan(criteria: str) -> FinancialPlan:
     prompt = f"""
 Context:
 - User Details:
-{anonymize_user_personal_details(USER_DETAILS)}
+{anonymize_user_personal_details(user_data.USER_DETAILS)}
 - User's Comprehensive Financial Summary:
 {get_user_financial_summary()}
 - User's Stated Financial Goal/Optimization Criteria: {criteria}
