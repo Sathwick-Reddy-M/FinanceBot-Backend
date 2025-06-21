@@ -128,7 +128,7 @@ def create_app() -> Flask:
             }
 
         # Messages
-        config = {"recursion_limit": 5}
+        config = {"recursion_limit": 500}
 
         processed_messages = parse_messages_for_langgraph(data["chatMessages"])
 
